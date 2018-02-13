@@ -1,0 +1,6 @@
+.lvimrc
+*~
+*.sw[op]
+tags
+
+.DS_Store
