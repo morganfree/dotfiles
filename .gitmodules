@@ -1,3 +1,4 @@
 [submodule "tmux/tmux-gitbar"]
 	path = tmux/tmux-gitbar
 	url = https://github.com/aurelien-rainone/tmux-gitbar
+  ignore = dirty
