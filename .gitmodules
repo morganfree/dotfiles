@@ -1,7 +1,7 @@
 [submodule "tmux/tmux-gitbar"]
 	path = tmux/tmux-gitbar
 	url = https://github.com/aurelien-rainone/tmux-gitbar
-  ignore = dirty
+	ignore = dirty
 [submodule "vim/pack/plugins/start/ale"]
 	path = vim/pack/plugins/start/ale
 	url = https://github.com/w0rp/ale.git
@@ -20,3 +20,6 @@
 [submodule "vim/pack/plugins/start/vim-jsx"]
 	path = vim/pack/plugins/start/vim-jsx
 	url = https://github.com/mxw/vim-jsx
+[submodule "tmux/tmux-mem-cpu-load"]
+	path = tmux/tmux-mem-cpu-load
+	url = https://github.com/thewtex/tmux-mem-cpu-load
