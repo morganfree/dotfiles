@@ -2,10 +2,6 @@
 
 set nocompatible                                    " make Vim behave in a more useful way
 
-" load plugins
-execute pathogen#infect()
-
-
 " -- GENERAL  ---------------------------------------------------------------------------------------------------
 
 set autoindent                                      " copy indent from current line when starting a new line
@@ -69,10 +65,26 @@ hi User1 ctermfg=cyan ctermbg=236
 hi User2 ctermfg=yellow ctermbg=236
 hi User3 ctermfg=green ctermbg=236
 hi User4 ctermfg=red ctermbg=236
+hi User5 ctermfg=224 ctermbg=236
+
+function! LinterStatus() abort
+    let l:counts = ale#statusline#Count(bufnr(''))
+
+    let l:all_errors = l:counts.error + l:counts.style_error
+    let l:all_non_errors = l:counts.total - l:all_errors
+
+    return l:counts.total == 0 ? '' : printf(
+    \   '[%d %d]',
+    \   all_errors,
+    \   all_non_errors
+    \)
+endfunction
 
 set statusline=%1*\ %n%2*\ %l/%L\ %v                " set the left of status line to: {line number/number of lines} {column number}
 set statusline+=%=
 set statusline+=%3*%f%4*%m                          " set the right of status line to: {relative path to file}{modified flag}
+
+set statusline+=%5*%{LinterStatus()}%*
 
 
 " -- KEY BINDINGS  ----------------------------------------------------------------------------------------------
@@ -214,6 +226,7 @@ augroup END
 " -- AUTOCOMMANDS  ----------------------------------------------------------------------------------------------
 
 augroup disableAutoCommenting
+  autocmd!
   autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 augroup END
 
