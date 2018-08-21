@@ -6,3 +6,9 @@ vim/swp/*
 
 vim/undo/*
 !vim/undo/.gitkeep
+
+vim/.netrwhist
+
+tmux-*.log
+
+node_modules
