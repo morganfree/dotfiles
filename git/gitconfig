@@ -1,0 +1,25 @@
+[core]
+	editor = vim
+
+[user]
+	email = sebastiandomas@gmail.com
+	name = morganfree
+
+[push]
+	default = upstream
+
+[pull]
+	default = current
+
+[diff]
+	tool = vimdiff
+
+[difftool]
+	prompt = false
+
+[merge]
+	tool = vimdiff
+	conflictstyle = diff3
+
+[mergetool]
+	prompt = false
