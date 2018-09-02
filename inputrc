@@ -2,6 +2,7 @@ set bell-style none
 set completion-ignore-case on
 set editing-mode vi
 set show-all-if-ambiguous on
+set show-mode-in-prompt on
 
 set keymap vi-insert
 

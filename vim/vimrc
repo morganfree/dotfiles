@@ -8,6 +8,7 @@ set autoindent                                      " copy indent from current l
 set autoread                                        " read the file again if it has been changed outside of vim
 set backspace=indent,eol,start                      " allow backspace to delete indent, end and start of line
 set backupdir=~/.vim/backup//                       " set the directory for backups
+set backupcopy=yes
 set colorcolumn=80                                  " set the screen column
 set completeopt=longest,menuone                     " improve completion menu
 set directory=~/.vim/swp//                          " set the directory for swaps
@@ -20,14 +21,17 @@ set laststatus=2                                    " always show a statusline
 set lazyredraw                                      " prevent from unnecessary redraws
 set list listchars=tab:\|-,trail:_                  " make whitespace characters visible
 set matchpairs+=<:>                                 " '<' and '>' form a pair
+set nobackup
 set noerrorbells visualbell t_vb=                   " disable flash and bell on error
 set nofoldenable                                    " open all folds
 set nostartofline                                   " keep the cursor in the same line after navigating
 set nowrap                                          " do not wrap lines
+set nowritebackup
 set nojoinspaces                                    " do not insert two spaces after a '.', ', ', '?', '!' with a join command
 set number                                          " show the absolute number
 set path=$PWD/**                                    " set path to the current directory and its all subdirectories
 set relativenumber                                  " show the relative number
+set omnifunc=syntaxcomplete#Complete                " turn on omni completion according to syntax
 set scrolloff=3                                     " start scrolling # lines before a buffer horizontal borders
 set shiftwidth=2                                    " number of spaces used in autoindent
 set showcmd                                         " show incomplete commands in the last line of the screen
@@ -40,6 +44,7 @@ set wildignore+=.DS_Store,*/node_modules/*          " ignore those files when ex
 set wildmenu                                        " enhance command-line completion
 
 set runtimepath+=/usr/local/opt/fzf                 " add fuzzy finder directory to runtime path
+set runtimepath+=/home/linuxbrew/.linuxbrew/opt/fzf " add fuzzy finder directory to runtime path
 
 
 " -- COLORS  ----------------------------------------------------------------------------------------------------
@@ -51,7 +56,7 @@ syntax on                                           " turn on syntax highlightin
 colorscheme jellybeans                              " set colorscheme
 
 " hide tilde signs at the end of buffer
-highlight EndOfBuffer ctermfg=black ctermbg=black
+" highlight EndOfBuffer ctermfg=black ctermbg=black
 
 " no special color for listchars
 hi SpecialKey ctermbg=none
@@ -83,8 +88,8 @@ endfunction
 set statusline=%1*\ %n%2*\ %l/%L\ %v                " set the left of status line to: {line number/number of lines} {column number}
 set statusline+=%=
 set statusline+=%3*%f%4*%m                          " set the right of status line to: {relative path to file}{modified flag}
-
-set statusline+=%5*%{LinterStatus()}%*
+set statusline+=%5*%{LinterStatus()}%*              " append linter status to the right of status line
+set statusline+=\ %1*%y                             " append filetype to the right of status line
 
 
 " -- KEY BINDINGS  ----------------------------------------------------------------------------------------------
@@ -131,7 +136,7 @@ nnoremap <leader>y "+y
 
 " -- PLUGINS / FILETYPES  ---------------------------------------------------------------------------------------
 
-filetype plugin indent on                           " turn on filetype plugin, indent and detection 
+filetype plugin indent on                           " turn on filetype plugin, indent and detection
 
 
 " -- netrw  -----------------------------------------------------------------------------------------------------
@@ -140,7 +145,7 @@ let g:netrw_alto=0
 let g:netrw_banner=0                                " hide the banner
 let g:netrw_liststyle=3                             " enable tree style listings
 let g:netrw_preview=1                               " preview window shown in a vertically split window
-let g:netrw_winsize=25                              " initial size of new netrw window
+"let g:netrw_winsize=25                              " initial size of new netrw window
 
 " settings for netrw buffers
 let g:netrw_bufsettings='noma nomod nonu nobl nowrap ro rnu'
@@ -162,7 +167,12 @@ let g:ale_sign_column_always=1                      " keep the sign column open
 let g:ale_linters={'javascript': ['standard', 'eslint', 'flow']}
 
 " set fixers
-let g:ale_fixers={'javascript': ['standard', 'eslint']}
+let g:ale_fixers={
+\  'javascript': ['standard', 'eslint'],
+\  'typescript': ['tslint']
+\}
+
+let g:ale_completion_enabled=1
 
 " fix the code
 nnoremap <leader>fi :ALEFix<CR>
@@ -176,22 +186,22 @@ let g:undotree_WindowLayout=2                       " set the layout: the tree o
 " toggle undotree
 nnoremap <leader>u :UndotreeToggle<CR>
 
+" -- fzf  -------------------------------------------------------------------------------------------------------
 
-" -- css  -------------------------------------------------------------------------------------------------------
+let g:fzf_action = {
+  \ 'ctrl-t': 'tab split',
+  \ 'ctrl-s': 'split',
+  \ 'ctrl-v': 'vsplit'
+  \  }
 
-augroup cssrc
-  autocmd!
-  autocmd FileType css setlocal omnifunc=csscomplete#CompleteCSS
-augroup END
+imap <c-x><c-k> <plug>(fzf-complete-word)
+imap <c-x><c-f> <plug>(fzf-complete-path)
+imap <c-x><c-j> <plug>(fzf-complete-file-ag)
+imap <c-x><c-l> <plug>(fzf-complete-line)
 
-
-" -- html  ------------------------------------------------------------------------------------------------------
-
-augroup htmlrc
-  autocmd!
-  autocmd FileType html,markdown setlocal omnifunc=htmlcomplete#CompleteTags
-augroup END
-
+nnoremap <leader>a :Ag<CR>
+nnoremap <leader>f :Files<CR>
+nnoremap <leader>t :Tags<CR>
 
 " -- javascript  ------------------------------------------------------------------------------------------------
 
@@ -205,21 +215,19 @@ let g:jsx_ext_required = 0                          " enable jsx syntax highligh
 " tern for vim
 let g:tern_map_keys=1                               " enable default key mappings
 
-augroup javascriptrc
-  autocmd!
-  autocmd FileType javascript
-        \ setlocal expandtab tabstop=2 shiftwidth=2 softtabstop=2 |
-        \ setlocal omnifunc=javascriptcomplete#CompleteJS
-augroup END
+" -- typescript  ------------------------------------------------------------------------------------------------
 
+augroup typescriptrc
+  autocmd!
+  autocmd Filetype typescript setlocal colorcolumn=120
+"  autocmd BufNewFile,BufRead *.tsx set filetype=typescript.jsx
+augroup END
 
 " -- python  ----------------------------------------------------------------------------------------------------
 
 augroup pythonrc
   autocmd!
-  autocmd FileType python
-        \ setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4 |
-        \ setlocal omnifunc=pythoncomplete#Complete
+  autocmd FileType python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 augroup END
 
 
@@ -240,4 +248,23 @@ augroup setRelativeNumberOnActiveWindow
   autocmd!
   autocmd BufEnter,WinEnter * if &ft!="netrw" && &ft!="help" | set relativenumber | endif
   autocmd BufLeave,WinLeave * if &ft!="netrw" && &ft!="help" | set norelativenumber | endif
+augroup END
+
+augroup quickfix
+  autocmd!
+  autocmd FileType qf nnoremap <buffer> <CR> <CR><C-W>p
+  autocmd FileType qf nnoremap <buffer> <C-n> :cnext<CR><C-W>p
+  autocmd FileType qf nnoremap <buffer> <C-p> :cprevious<CR><C-W>p
+augroup END
+
+function! SetDiffColors()
+  highlight DiffAdd    cterm=none ctermfg=none ctermbg=22
+  highlight DiffDelete cterm=none ctermfg=none ctermbg=52
+  highlight DiffChange cterm=none ctermfg=none ctermbg=23
+  highlight DiffText   cterm=none ctermfg=none ctermbg=23
+endfunction
+
+augroup setDiffColors
+  autocmd!
+  autocmd FilterWritePre * call SetDiffColors()
 augroup END
