@@ -23,3 +23,6 @@
 
 [mergetool]
 	prompt = false
+
+[log]
+	decorate = auto
