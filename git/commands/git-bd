@@ -1,0 +1,26 @@
+#!/usr/bin/env bash
+
+# Shows branches with descriptions
+show_branches() {
+	local cyan=$(tput setaf 6)
+	local green=$(tput setaf 2)
+	local normal=$(tput sgr0)
+	local description
+	local format
+
+	local branches=$(git for-each-ref --format='%(refname)' refs/heads/ | sed 's|refs/heads/||')
+
+	for branch in $branches; do
+		description="$cyan$(git config branch.$branch.description)$normal"
+
+		if [ $branch == $(git rev-parse --abbrev-ref HEAD) ]; then
+			format="* $green%-15s$normal %s\n"
+		else
+			format="  %-15s %s\n"
+		fi
+
+		printf "$format" "$branch" "$description"
+	done
+}
+
+show_branches

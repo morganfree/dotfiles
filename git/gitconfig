@@ -26,3 +26,6 @@
 
 [log]
 	decorate = auto
+
+[alias]
+	bd = "!git_bd"

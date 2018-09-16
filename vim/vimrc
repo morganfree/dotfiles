@@ -9,7 +9,7 @@ set autoread                                        " read the file again if it 
 set backspace=indent,eol,start                      " allow backspace to delete indent, end and start of line
 set backupdir=~/.vim/backup//                       " set the directory for backups
 set backupcopy=yes
-set colorcolumn=80                                  " set the screen column
+set colorcolumn=80,120,140                          " set the screen column
 set completeopt=longest,menuone                     " improve completion menu
 set directory=~/.vim/swp//                          " set the directory for swaps
 set encoding=utf-8 nobomb                           " set encoding
@@ -40,7 +40,7 @@ set splitright                                      " a new window is put on the
 set splitbelow                                      " a new window is put below
 set tabstop=2                                       " number of spaces for <tab>
 set ttyfast                                         " send more characters to the screen for redrawing
-set wildignore+=.DS_Store,*/node_modules/*          " ignore those files when expanding wildcards
+set wildignore+=*/node_modules/*                    " ignore those files when expanding wildcards
 set wildmenu                                        " enhance command-line completion
 
 set runtimepath+=/usr/local/opt/fzf                 " add fuzzy finder directory to runtime path
@@ -164,11 +164,11 @@ let g:ale_lint_delay=1000                           " delay linting after text i
 let g:ale_sign_column_always=1                      " keep the sign column open
 
 " set linters
-let g:ale_linters={'javascript': ['standard', 'eslint', 'flow']}
+let g:ale_linters={'javascript': ['standard']}
 
 " set fixers
 let g:ale_fixers={
-\  'javascript': ['standard', 'eslint'],
+\  'javascript': ['eslint'],
 \  'typescript': ['tslint']
 \}
 
@@ -214,14 +214,6 @@ let g:jsx_ext_required = 0                          " enable jsx syntax highligh
 
 " tern for vim
 let g:tern_map_keys=1                               " enable default key mappings
-
-" -- typescript  ------------------------------------------------------------------------------------------------
-
-augroup typescriptrc
-  autocmd!
-  autocmd Filetype typescript setlocal colorcolumn=120
-"  autocmd BufNewFile,BufRead *.tsx set filetype=typescript.jsx
-augroup END
 
 " -- python  ----------------------------------------------------------------------------------------------------
 
