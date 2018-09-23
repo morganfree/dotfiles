@@ -2,6 +2,7 @@
 
 set nocompatible                                    " make Vim behave in a more useful way
 
+
 " -- GENERAL  ---------------------------------------------------------------------------------------------------
 
 set autoindent                                      " copy indent from current line when starting a new line
@@ -24,6 +25,9 @@ set matchpairs+=<:>                                 " '<' and '>' form a pair
 set nobackup
 set noerrorbells visualbell t_vb=                   " disable flash and bell on error
 set nofoldenable                                    " open all folds
+set nomodeline                                      " disable modeline
+set noshowcmd                                       " do not show incomplete commands in the last line of the screen
+set noshowmode                                      " do not show mode
 set nostartofline                                   " keep the cursor in the same line after navigating
 set nowrap                                          " do not wrap lines
 set nowritebackup
@@ -34,7 +38,6 @@ set relativenumber                                  " show the relative number
 set omnifunc=syntaxcomplete#Complete                " turn on omni completion according to syntax
 set scrolloff=3                                     " start scrolling # lines before a buffer horizontal borders
 set shiftwidth=2                                    " number of spaces used in autoindent
-set showcmd                                         " show incomplete commands in the last line of the screen
 set smartcase                                       " disable ignorecase if uppercase letters are used
 set splitright                                      " a new window is put on the right 
 set splitbelow                                      " a new window is put below
@@ -42,9 +45,6 @@ set tabstop=2                                       " number of spaces for <tab>
 set ttyfast                                         " send more characters to the screen for redrawing
 set wildignore+=*/node_modules/*                    " ignore those files when expanding wildcards
 set wildmenu                                        " enhance command-line completion
-
-set runtimepath+=/usr/local/opt/fzf                 " add fuzzy finder directory to runtime path
-set runtimepath+=/home/linuxbrew/.linuxbrew/opt/fzf " add fuzzy finder directory to runtime path
 
 
 " -- COLORS  ----------------------------------------------------------------------------------------------------
@@ -145,7 +145,6 @@ let g:netrw_alto=0
 let g:netrw_banner=0                                " hide the banner
 let g:netrw_liststyle=3                             " enable tree style listings
 let g:netrw_preview=1                               " preview window shown in a vertically split window
-"let g:netrw_winsize=25                              " initial size of new netrw window
 
 " settings for netrw buffers
 let g:netrw_bufsettings='noma nomod nonu nobl nowrap ro rnu'
@@ -156,23 +155,24 @@ nnoremap <C-w>e :Lexplore<CR>
 
 " -- ale  -------------------------------------------------------------------------------------------------------
 
-" let g:ale_lint_on_enter=1                           " lint on opening a file
-" let g:ale_lint_on_insert_leave=1                    " lint on insert leave
-" let g:ale_lint_on_save=1                            " lint on file save
 let g:ale_lint_on_text_changed='always'             " dont lint on text change
 let g:ale_lint_delay=1000                           " delay linting after text is changed
 let g:ale_sign_column_always=1                      " keep the sign column open
+let g:ale_completion_enabled=1                      " enable auto completion
+let g:ale_linters_explicit=1                        " do not run linters unless they are specified explicitly
 
 " set linters
-let g:ale_linters={'javascript': ['standard']}
+let g:ale_linters={
+\  'javascript': ['standard'],
+\  'typescript': ['tsserver', 'tslint'],
+\  'sh': ['shellcheck']
+\}
 
 " set fixers
 let g:ale_fixers={
-\  'javascript': ['eslint'],
+\  'javascript': ['standard'],
 \  'typescript': ['tslint']
 \}
-
-let g:ale_completion_enabled=1
 
 " fix the code
 nnoremap <leader>fi :ALEFix<CR>
@@ -185,6 +185,7 @@ let g:undotree_WindowLayout=2                       " set the layout: the tree o
 
 " toggle undotree
 nnoremap <leader>u :UndotreeToggle<CR>
+
 
 " -- fzf  -------------------------------------------------------------------------------------------------------
 
@@ -203,17 +204,16 @@ nnoremap <leader>a :Ag<CR>
 nnoremap <leader>f :Files<CR>
 nnoremap <leader>t :Tags<CR>
 
+
 " -- javascript  ------------------------------------------------------------------------------------------------
 
 " vim-javascript
 let g:javascript_plugin_flow=1                      " enable syntax highlighting for flow
 let g:javascript_plugin_jsdoc=1                     " enable syntax highlighting for jsdoc
 
-" vim-jsx
-let g:jsx_ext_required = 0                          " enable jsx syntax highlighting for files with .js and .jsx extension
-
 " tern for vim
 let g:tern_map_keys=1                               " enable default key mappings
+
 
 " -- python  ----------------------------------------------------------------------------------------------------
 
@@ -222,8 +222,15 @@ augroup pythonrc
   autocmd FileType python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
 augroup END
 
+" -- sh  ----------------------------------------------------------------------------------------------------
 
-" -- AUTOCOMMANDS  ----------------------------------------------------------------------------------------------
+augroup shrc
+  autocmd!
+  autocmd FileType sh setlocal noexpandtab
+augroup END
+
+
+" -- autocommands  ----------------------------------------------------------------------------------------------
 
 augroup disableAutoCommenting
   autocmd!
@@ -260,3 +267,19 @@ augroup setDiffColors
   autocmd!
   autocmd FilterWritePre * call SetDiffColors()
 augroup END
+
+" -- cursor shape -----------------------------------------------------------------------------------------------
+
+augroup resetCursorShape
+  au!
+  autocmd VimEnter * silent !echo -ne "\e[2 q"
+augroup END
+
+let &t_SI = "\e[6 q"                                " set the cursor to be a steady vertical line when insert mode starts
+let &t_EI = "\e[2 q"                                " set the cursor to be a steady block when insert/replace mode ends
+
+" -- local vimrc  -----------------------------------------------------------------------------------------------
+
+if filereadable(glob("~/.vimrc.local"))
+  source ~/.vimrc.local
+endif
