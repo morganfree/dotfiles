@@ -163,7 +163,7 @@ let g:ale_linters_explicit=1                        " do not run linters unless 
 
 " set linters
 let g:ale_linters={
-\  'javascript': ['standard'],
+\  'javascript': ['tsserver', 'standard'],
 \  'typescript': ['tsserver', 'tslint'],
 \  'sh': ['shellcheck']
 \}
@@ -176,6 +176,9 @@ let g:ale_fixers={
 
 " fix the code
 nnoremap <leader>fi :ALEFix<CR>
+
+" go to definition under the cursor
+nnoremap <leader>gf :ALEGoToDefinition<CR>
 
 
 " -- undotree  --------------------------------------------------------------------------------------------------

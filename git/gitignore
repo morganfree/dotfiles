@@ -1,4 +1,4 @@
-.lvimrc
+.vimrc.local
 *~
 *.sw[op]
 tags
