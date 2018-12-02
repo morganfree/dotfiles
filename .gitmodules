@@ -17,9 +17,6 @@
 [submodule "vim/pack/plugins/start/vim-jsx"]
 	path = vim/pack/plugins/start/vim-jsx
 	url = https://github.com/mxw/vim-jsx
-[submodule "tmux/tmux-mem-cpu-load"]
-	path = tmux/tmux-mem-cpu-load
-	url = https://github.com/thewtex/tmux-mem-cpu-load
 [submodule "tmux/tmux-gitbar"]
 	path = tmux/tmux-gitbar
 	url = https://github.com/morganfree/tmux-gitbar
