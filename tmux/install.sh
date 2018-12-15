@@ -1,6 +1,6 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" >/dev/null && pwd )"
 
-ln -s "$DIR/tmux.conf" $HOME/.tmux.conf
-ln -s "$DIR" $HOME/.tmux
+ln -s "$DIR/tmux.conf" "$HOME/.tmux.conf"
+ln -s "$DIR" "$HOME/.tmux"

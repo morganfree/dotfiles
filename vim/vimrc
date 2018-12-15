@@ -14,7 +14,6 @@ set colorcolumn=80,120,140                          " set the screen column
 set completeopt=longest,menuone                     " improve completion menu
 set directory=~/.vim/swp//                          " set the directory for swaps
 set encoding=utf-8 nobomb                           " set encoding
-set expandtab                                       " use spaces instead of tabs
 set hlsearch                                        " highlight matches
 set ignorecase                                      " ignore case in searches
 set incsearch                                       " highlight matches while typing
@@ -37,20 +36,21 @@ set path=$PWD/**                                    " set path to the current di
 set relativenumber                                  " show the relative number
 set omnifunc=syntaxcomplete#Complete                " turn on omni completion according to syntax
 set scrolloff=3                                     " start scrolling # lines before a buffer horizontal borders
-set shiftwidth=2                                    " number of spaces used in autoindent
+set signcolumn=yes                                  " always draw the sign column
 set smartcase                                       " disable ignorecase if uppercase letters are used
-set splitright                                      " a new window is put on the right 
+set splitright                                      " a new window is put on the right
 set splitbelow                                      " a new window is put below
-set tabstop=2                                       " number of spaces for <tab>
+set synmaxcol=240                                   " set maximum column in which to search for syntax items
 set ttyfast                                         " send more characters to the screen for redrawing
 set wildignore+=*/node_modules/*                    " ignore those files when expanding wildcards
 set wildmenu                                        " enhance command-line completion
+set winminheight=0                                  " set the minimal height of a non active window
+set winminwidth=0                                   " set the minimal width of a non active window
 
 
 " -- COLORS  ----------------------------------------------------------------------------------------------------
 
 set t_Co=256                                        " enable 256 colors
-set background=dark                                 " set background
 
 syntax on                                           " turn on syntax highlighting
 colorscheme jellybeans                              " set colorscheme
@@ -72,30 +72,28 @@ hi User3 ctermfg=green ctermbg=236
 hi User4 ctermfg=red ctermbg=236
 hi User5 ctermfg=224 ctermbg=236
 
-function! LinterStatus() abort
+function! Linter_status() abort
     let l:counts = ale#statusline#Count(bufnr(''))
 
     let l:all_errors = l:counts.error + l:counts.style_error
     let l:all_non_errors = l:counts.total - l:all_errors
 
-    return l:counts.total == 0 ? '' : printf(
-    \   '[%d %d]',
-    \   all_errors,
-    \   all_non_errors
-    \)
+    return l:counts.total == 0
+          \ ? ''
+          \ : printf('[%d %d]', all_errors, all_non_errors)
 endfunction
 
 set statusline=%1*\ %n%2*\ %l/%L\ %v                " set the left of status line to: {line number/number of lines} {column number}
 set statusline+=%=
 set statusline+=%3*%f%4*%m                          " set the right of status line to: {relative path to file}{modified flag}
-set statusline+=%5*%{LinterStatus()}%*              " append linter status to the right of status line
+set statusline+=%5*%{Linter_status()}%*             " append linter status to the right of status line
 set statusline+=\ %1*%y                             " append filetype to the right of status line
 
 
 " -- KEY BINDINGS  ----------------------------------------------------------------------------------------------
 
-let mapleader=","                                   " map the leader key
-let maplocalleader="\\"                             " map the local leader key
+let mapleader=","
+let maplocalleader="\\"
 
 nnoremap <leader>" viw<esc>a"<esc>bi"<esc>lel
 nnoremap <leader>' viw<esc>a'<esc>bi'<esc>lel
@@ -107,10 +105,10 @@ nnoremap / /\v
 cnoremap %s %s/\v
 
 " navigate faster
-nnoremap <C-e> 3<C-e>
-nnoremap <C-y> 3<C-y>
-vnoremap <C-e> 3<C-e>
-vnoremap <C-y> 3<C-y>
+nnoremap <c-e> 3<c-e>
+nnoremap <c-y> 3<c-y>
+vnoremap <c-e> 3<c-e>
+vnoremap <c-y> 3<c-y>
 
 " clear search highlight
 nnoremap <leader>n :noh<cr>
@@ -121,17 +119,29 @@ nnoremap <leader>= gg=G``
 " toggle case of the inner word
 nnoremap <leader>~ g~iw
 
-" insert a new line below the cursor
-nnoremap <leader>o o<ESC>k 
-" insert a new line above the cursor
-nnoremap <leader>O O<ESC>j
-
 " yank from the cursor to the end of line
 nnoremap Y y$
 
-" yank/paste to the system clipboard
+" paste to the system clipboard
 nnoremap <leader>p "+p
-nnoremap <leader>y "+y
+
+function! s:zoom_toggle() abort
+  if 1 == winnr('$')
+    return
+  endif
+  let restore_cmd = winrestcmd()
+  wincmd |
+  wincmd _
+  " If the layout did not change, it's a toggle (un-zoom).
+  if restore_cmd ==# winrestcmd()
+    exe t:zoom_restore
+  else
+    let t:zoom_restore = restore_cmd
+  endif
+endfunction
+
+" toggle zoom for an active window
+nnoremap <c-w>z :call <sid>zoom_toggle()<cr>
 
 
 " -- PLUGINS / FILETYPES  ---------------------------------------------------------------------------------------
@@ -143,48 +153,33 @@ filetype plugin indent on                           " turn on filetype plugin, i
 
 let g:netrw_alto=0
 let g:netrw_banner=0                                " hide the banner
-let g:netrw_liststyle=3                             " enable tree style listings
+let g:netrw_liststyle=0                             " show one file per line
 let g:netrw_preview=1                               " preview window shown in a vertically split window
 
 " settings for netrw buffers
 let g:netrw_bufsettings='noma nomod nonu nobl nowrap ro rnu'
 
-" toggle the local-directory browser in the left vertical split 
-nnoremap <C-w>e :Lexplore<CR>
+" toggle the local-directory browser in the left vertical split
+nnoremap <c-w>E :Lexplore<cr>
+nnoremap <c-w>e :Vexplore<cr>
 
 
 " -- ale  -------------------------------------------------------------------------------------------------------
 
 let g:ale_lint_on_text_changed='always'             " dont lint on text change
 let g:ale_lint_delay=1000                           " delay linting after text is changed
-let g:ale_sign_column_always=1                      " keep the sign column open
-let g:ale_completion_enabled=1                      " enable auto completion
-let g:ale_linters_explicit=1                        " do not run linters unless they are specified explicitly
+let g:ale_completion_enabled=0                      " enable auto completion
+let g:ale_linters_explicit=2                        " do not run linters unless they are specified explicitly
+let g:ale_lint_on_enter=0
 
-" set linters
-let g:ale_linters={
-\  'javascript': ['tsserver', 'standard'],
-\  'typescript': ['tsserver', 'tslint'],
-\  'sh': ['shellcheck']
-\}
-
-" set fixers
-let g:ale_fixers={
-\  'javascript': ['standard'],
-\  'typescript': ['tslint']
-\}
-
-" fix the code
-nnoremap <leader>fi :ALEFix<CR>
-
-" go to definition under the cursor
-nnoremap <leader>gf :ALEGoToDefinition<CR>
+nnoremap <leader>fi :ALEFix<cr>
 
 
 " -- undotree  --------------------------------------------------------------------------------------------------
 
 let g:undotree_HelpLine=0                           " hide help line
 let g:undotree_WindowLayout=2                       " set the layout: the tree on the left, the diff below
+let g:undotree_SetFocusWhenToggle=1                 " focus undotree window after being opened
 
 " toggle undotree
 nnoremap <leader>u :UndotreeToggle<CR>
@@ -192,94 +187,93 @@ nnoremap <leader>u :UndotreeToggle<CR>
 
 " -- fzf  -------------------------------------------------------------------------------------------------------
 
+function! s:build_quickfix_list(lines)
+  call setqflist(map(copy(a:lines), '{ "filename": v:val }'))
+  copen
+  cc
+endfunction
+
 let g:fzf_action = {
-  \ 'ctrl-t': 'tab split',
-  \ 'ctrl-s': 'split',
-  \ 'ctrl-v': 'vsplit'
-  \  }
+      \   'ctrl-q': function('s:build_quickfix_list'),
+      \   'ctrl-t': 'tab split',
+      \   'ctrl-s': 'split',
+      \   'ctrl-v': 'vsplit'
+      \ }
 
-imap <c-x><c-k> <plug>(fzf-complete-word)
-imap <c-x><c-f> <plug>(fzf-complete-path)
-imap <c-x><c-j> <plug>(fzf-complete-file-ag)
-imap <c-x><c-l> <plug>(fzf-complete-line)
+command! -bang -nargs=* Ag call fzf#vim#ag(
+      \   <q-args>,
+      \   <bang>0 ? fzf#vim#with_preview('up:60%') : { },
+      \   <bang>0
+      \ )
 
-nnoremap <leader>a :Ag<CR>
-nnoremap <leader>f :Files<CR>
-nnoremap <leader>t :Tags<CR>
+function! s:fzf_dirs(dir, bang)
+  let l:dir = empty(a:dir) || !isdirectory(expand(a:dir)) ?
+        \ fnamemodify(getcwd(), ':~:.') :
+        \ a:dir
 
+  let l:prompt = (strwidth(l:dir) < &columns / 2 - 20 ? l:dir : '') . '> '
+  let l:options = ['+m', '--prompt', l:prompt]
 
-" -- javascript  ------------------------------------------------------------------------------------------------
+  if a:bang
+    call extend(l:options, ['--preview', 'ls -p {}'])
+  endif
 
-" vim-javascript
-let g:javascript_plugin_flow=1                      " enable syntax highlighting for flow
-let g:javascript_plugin_jsdoc=1                     " enable syntax highlighting for jsdoc
+  return fzf#run(fzf#wrap({
+        \   'source': 'fd -t d',
+        \   'dir': l:dir,
+        \   'options': l:options
+        \ }, a:bang))
+endfunction
 
-" tern for vim
-let g:tern_map_keys=1                               " enable default key mappings
+command! -bang -nargs=? -complete=dir Dirs call <sid>fzf_dirs(<q-args>, <bang>0)
 
-
-" -- python  ----------------------------------------------------------------------------------------------------
-
-augroup pythonrc
-  autocmd!
-  autocmd FileType python setlocal expandtab tabstop=4 shiftwidth=4 softtabstop=4
-augroup END
-
-" -- sh  ----------------------------------------------------------------------------------------------------
-
-augroup shrc
-  autocmd!
-  autocmd FileType sh setlocal noexpandtab
-augroup END
+nnoremap <space>f :Files<cr>
+nnoremap <space>d :Dirs<cr>
+nnoremap <space>b :Buffers<cr>
 
 
 " -- autocommands  ----------------------------------------------------------------------------------------------
 
-augroup disableAutoCommenting
+augroup disable_auto_commenting
   autocmd!
   autocmd FileType * setlocal formatoptions-=c formatoptions-=r formatoptions-=o
 augroup END
 
-augroup autoChangeDirectory
+augroup auto_change_dir
   autocmd!
   autocmd InsertEnter * let b:save_cwd = getcwd() | set autochdir
   autocmd InsertLeave * set noautochdir | execute 'cd' fnameescape(b:save_cwd)
 augroup END
 
-augroup setRelativeNumberOnActiveWindow
+augroup set_relativenumber_on_active_window
   autocmd!
   autocmd BufEnter,WinEnter * if &ft!="netrw" && &ft!="help" | set relativenumber | endif
   autocmd BufLeave,WinLeave * if &ft!="netrw" && &ft!="help" | set norelativenumber | endif
 augroup END
 
-augroup quickfix
-  autocmd!
-  autocmd FileType qf nnoremap <buffer> <CR> <CR><C-W>p
-  autocmd FileType qf nnoremap <buffer> <C-n> :cnext<CR><C-W>p
-  autocmd FileType qf nnoremap <buffer> <C-p> :cprevious<CR><C-W>p
-augroup END
-
-function! SetDiffColors()
+function! s:set_diff_colors()
   highlight DiffAdd    cterm=none ctermfg=none ctermbg=22
   highlight DiffDelete cterm=none ctermfg=none ctermbg=52
   highlight DiffChange cterm=none ctermfg=none ctermbg=23
   highlight DiffText   cterm=none ctermfg=none ctermbg=23
 endfunction
 
-augroup setDiffColors
+augroup set_diff_colors
   autocmd!
-  autocmd FilterWritePre * call SetDiffColors()
+  autocmd FilterWritePre * call <sid>set_diff_colors()
 augroup END
+
 
 " -- cursor shape -----------------------------------------------------------------------------------------------
 
-augroup resetCursorShape
-  au!
+augroup reset_cursor_shape
+  autocmd!
   autocmd VimEnter * silent !echo -ne "\e[2 q"
 augroup END
 
 let &t_SI = "\e[6 q"                                " set the cursor to be a steady vertical line when insert mode starts
 let &t_EI = "\e[2 q"                                " set the cursor to be a steady block when insert/replace mode ends
+
 
 " -- local vimrc  -----------------------------------------------------------------------------------------------
 
