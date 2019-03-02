@@ -17,7 +17,7 @@ set encoding=utf-8 nobomb                           " set encoding
 set hlsearch                                        " highlight matches
 set ignorecase                                      " ignore case in searches
 set incsearch                                       " highlight matches while typing
-set laststatus=2                                    " always show a statusline
+set laststatus=1                                    " show a statusline if there are more than 1 windows
 set lazyredraw                                      " prevent from unnecessary redraws
 set list listchars=tab:\|-,trail:_                  " make whitespace characters visible
 set matchpairs+=<:>                                 " '<' and '>' form a pair
@@ -41,12 +41,12 @@ set smartcase                                       " disable ignorecase if uppe
 set splitright                                      " a new window is put on the right
 set splitbelow                                      " a new window is put below
 set synmaxcol=240                                   " set maximum column in which to search for syntax items
+set tabpagemax=50                                   " set maximum number of tab pages to be opened by the -p command
 set ttyfast                                         " send more characters to the screen for redrawing
 set wildignore+=*/node_modules/*                    " ignore those files when expanding wildcards
 set wildmenu                                        " enhance command-line completion
 set winminheight=0                                  " set the minimal height of a non active window
 set winminwidth=0                                   " set the minimal width of a non active window
-
 
 " -- COLORS  ----------------------------------------------------------------------------------------------------
 
@@ -54,9 +54,6 @@ set t_Co=256                                        " enable 256 colors
 
 syntax on                                           " turn on syntax highlighting
 colorscheme jellybeans                              " set colorscheme
-
-" hide tilde signs at the end of buffer
-" highlight EndOfBuffer ctermfg=black ctermbg=black
 
 " no special color for listchars
 hi SpecialKey ctermbg=none
@@ -69,25 +66,10 @@ hi StatusLine ctermbg=236
 hi User1 ctermfg=cyan ctermbg=236
 hi User2 ctermfg=yellow ctermbg=236
 hi User3 ctermfg=green ctermbg=236
-hi User4 ctermfg=red ctermbg=236
-hi User5 ctermfg=224 ctermbg=236
 
-function! Linter_status() abort
-    let l:counts = ale#statusline#Count(bufnr(''))
-
-    let l:all_errors = l:counts.error + l:counts.style_error
-    let l:all_non_errors = l:counts.total - l:all_errors
-
-    return l:counts.total == 0
-          \ ? ''
-          \ : printf('[%d %d]', all_errors, all_non_errors)
-endfunction
-
-set statusline=%1*\ %n%2*\ %l/%L\ %v                " set the left of status line to: {line number/number of lines} {column number}
+set statusline=%1*\ %n%2*\ %l/%L                    " set the left of status line to: {line number/number of lines} {column number}
 set statusline+=%=
-set statusline+=%3*%f%4*%m                          " set the right of status line to: {relative path to file}{modified flag}
-set statusline+=%5*%{Linter_status()}%*             " append linter status to the right of status line
-set statusline+=\ %1*%y                             " append filetype to the right of status line
+set statusline+=%3*%f                               " set the right of status line to: {relative path to file}
 
 
 " -- KEY BINDINGS  ----------------------------------------------------------------------------------------------
