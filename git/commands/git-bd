@@ -1,31 +1,24 @@
 #!/usr/bin/env bash
 
 # Shows branches with descriptions
-show_branches() {
-	local cyan
-	local green
-	local normal
-	local branches
-	local description
-	local format
 
-	cyan=$(tput setaf 6)
-	green=$(tput setaf 2)
-	normal=$(tput sgr0)
-	branches=$(git for-each-ref --format='%(refname)' refs/heads/ | sed 's|refs/heads/||')
+cyan=$(tput setaf 6)
+green=$(tput setaf 2)
+normal=$(tput sgr0)
+branches=$(git for-each-ref --format='%(refname:short)' refs/heads)
+current_branch=$(git rev-parse --abbrev-ref HEAD)
+output=""
 
-	for branch in $branches; do
-		description="$cyan$(git config branch."$branch".description)$normal"
+for branch in $branches; do
+	if [ "$branch" == "$current_branch" ]; then
+		branch_format="* $green%-15s$normal"
+	else
+		branch_format="  %-15s"
+	fi
 
-		if [ "$branch" == "$(git rev-parse --abbrev-ref HEAD)" ]; then
-			format="* $green%-15s$normal %s\\n"
-		else
-			format="  %-15s %s\\n"
-		fi
+	description="$cyan$(git config branch."$branch".description)$normal"
+	printf -v line "$branch_format %s\\n" "$branch" "$description"
+	output="$output$line"
+done
 
-		# shellcheck disable=SC2059
-		printf "${format}" "$branch" "$description"
-	done
-}
-
-show_branches
+printf %s "$output"
