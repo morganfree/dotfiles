@@ -17,7 +17,7 @@ set encoding=utf-8 nobomb                           " set encoding
 set hlsearch                                        " highlight matches
 set ignorecase                                      " ignore case in searches
 set incsearch                                       " highlight matches while typing
-set laststatus=1                                    " show a statusline if there are more than 1 windows
+set laststatus=2                                    " always show the statusline
 set lazyredraw                                      " prevent from unnecessary redraws
 set list listchars=tab:\|-,trail:_                  " make whitespace characters visible
 set matchpairs+=<:>                                 " '<' and '>' form a pair

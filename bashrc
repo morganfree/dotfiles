@@ -17,9 +17,7 @@ alias dotfiles='cd ~/dotfiles'
 alias tmuxconf='vim ~/.tmux.conf'
 alias vimrc='vim ~/.vim/vimrc'
 alias bashrc='vim ~/.bashrc'
-alias bash_profile='vim ~/.bash_profile'
 alias inputrc='vim ~/.inputrc'
-
 
 if [ -f ~/.bashrc.local ]; then
 	# shellcheck source=/dev/null
