@@ -6,6 +6,7 @@
 [user]
 	email = sebastiandomas@gmail.com
 	name = morganfree
+	signingkey = 63A81B569794670F
 
 [push]
 	default = upstream
@@ -46,3 +47,7 @@
 	old = red
 	new = green
 	whitespace = red reverse
+[commit]
+	gpgsign = true
+[gpg]
+	program = gpg
