@@ -41,7 +41,7 @@ set smartcase                                       " disable ignorecase if uppe
 set splitright                                      " a new window is put on the right
 set splitbelow                                      " a new window is put below
 set synmaxcol=240                                   " set maximum column in which to search for syntax items
-set tabpagemax=50                                   " set maximum number of tab pages to be opened by the -p command
+set tabpagemax=100                                  " set maximum number of tab pages to be opened by the -p command
 set ttyfast                                         " send more characters to the screen for redrawing
 set wildignore+=*/node_modules/*                    " ignore those files when expanding wildcards
 set wildmenu                                        " enhance command-line completion
