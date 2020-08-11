@@ -1,0 +1,16 @@
+---
+- name: git
+  hosts: local
+  tasks:
+    - name: install and configure git
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: git
+        files: [ gitconfig, gitignore ]
+    - name: install git commands
+      file:
+        src: '{{ item }}'
+        path: /usr/local/bin/{{ item | basename }}
+        state: link
+      loop: '{{ lookup("fileglob", "git/commands/*", wantlist=True) }}'

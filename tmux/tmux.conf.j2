@@ -101,13 +101,13 @@ set -g status-right-length 120                                                 #
 # set -g status-right "#(cd #{pane_current_path}; git status --branch --porcelain=2 | awk '$2 ~ /head|upstream/ { print \"#[fg=green]\"$3 }' ORS=' ')"
 set -g status-right ''
 
-set-hook -g window-pane-changed 'run-shell "$HOME/.tmux/git-status.sh #{pane_current_path}"'
-set-hook -g session-window-changed 'run-shell "$HOME/.tmux/git-status.sh #{pane_current_path}"'
-set-hook -g session-changed 'run-shell "$HOME/.tmux/git-status.sh #{pane_current_path}"'
+set-hook -g window-pane-changed 'run-shell "$HOME/.tmux/git_status.sh #{pane_current_path}"'
+set-hook -g session-window-changed 'run-shell "$HOME/.tmux/git_status.sh #{pane_current_path}"'
+set-hook -g client-session-changed 'run-shell "$HOME/.tmux/git_status.sh #{pane_current_path}"'
 
 # pane status
 set -wg pane-border-status top                                                 # set the pane status on top
 set -wg pane-border-format " #{b:pane_current_path} "                          # {pane_current_path_basename}
 
-if-shell 'echo $PROMPT_COMMAND | grep -qv git-status' \
-  'PROMPT_COMMAND="$HOME/.tmux/git-status.sh; $PROMPT_COMMAND"'
+if-shell 'echo $PROMPT_COMMAND | grep -qv git_status' \
+  'PROMPT_COMMAND="$HOME/.tmux/git_status.sh; $PROMPT_COMMAND"'

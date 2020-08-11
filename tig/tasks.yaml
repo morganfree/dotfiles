@@ -1,0 +1,9 @@
+---
+- name: tig
+  hosts: local
+  tasks:
+    - name: install and configure tig
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: tig

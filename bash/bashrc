@@ -48,3 +48,33 @@ get_mfa() {
 get_mfa_prod() {
 	oathtool --base32 --totp "$(pass aws/prod/mfa)" | pbcopy
 }
+
+docker-lim() {
+	echo -n "$(docker image ls --format '{{.Repository}}:{{.Tag}}' | head -n 1)" | pbcopy
+}
+
+docker-ps-watch() {
+	local ids ids_count id
+	ids="$(docker container ps --format '{{.ID}}')"
+	ids_count="$(echo -n "$ids" | grep -c ^)"
+	id="$ids"
+
+	[ "$ids_count" -eq 0 ] && return
+
+	[ "$ids_count" -gt 1 ] && id="$(echo "$ids" | fzf --print0)"
+
+	docker exec -it "$id" watch ps
+}
+
+docker-ps-sh() {
+	local ids ids_count id
+	ids="$(docker container ps --format '{{.ID}}')"
+	ids_count="$(echo -n "$ids" | grep -c ^)"
+	id="$ids"
+
+	[ "$ids_count" -eq 0 ] && return
+
+	[ "$ids_count" -gt 1 ] && id="$(echo "$ids" | fzf --print0)"
+
+	docker exec -it "$id" sh
+}

@@ -1,0 +1,10 @@
+---
+- name: bash
+  hosts: local
+  tasks:
+    - name: bash
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: bash
+        files: [ bashrc, bash_profile, inputrc ]

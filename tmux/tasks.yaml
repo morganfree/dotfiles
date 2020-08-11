@@ -1,0 +1,10 @@
+---
+- name: tmux
+  hosts: local
+  tasks:
+    - name: install and configure tmux
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: tmux
+        files: [ tmux.conf ]
