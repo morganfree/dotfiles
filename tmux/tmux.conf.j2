@@ -58,8 +58,8 @@ bind b set -g pane-border-status                                               #
 
 bind -T copy-mode-vi v send-keys -X begin-selection                            # vi-like selection
 
-if-shell 'test "$(uname)" = "Darwin"' "source-file $HOME/.tmux/tmux.osx.conf"  # osx clipboard support
-if-shell 'test "$(uname)" = "Linux"' 'source-file $HOME/.tmux/tmux.linux.conf' # linux clipboard support
+if-shell 'test "$(uname)" = "Darwin"' 'source-file {{ playbook_dir }}/tmux.osx.conf'  # osx clipboard support
+if-shell 'test "$(uname)" = "Linux"' 'source-file {{ playbook_dir }}/tmux.linux.conf' # linux clipboard support
 
 
 # -- COLORS  ---------------------------------------------------------------------------------------------------
@@ -87,7 +87,7 @@ set -gw window-status-format "#I:#W #P/#{window_panes}"                        #
 # left component
 set -g status-left-style fg=colour237                                          # set window status style
 set -g status-left-length 120                                                  # set the maximum length of the left of status line
-set -g status-left " #($HOME/.tmux/session-status.sh #S)"                      # {session_name}
+set -g status-left " #($HOME/.tmux/session_status.sh #S)"                      # {session_name}
 
 
 # window component
@@ -101,13 +101,13 @@ set -g status-right-length 120                                                 #
 # set -g status-right "#(cd #{pane_current_path}; git status --branch --porcelain=2 | awk '$2 ~ /head|upstream/ { print \"#[fg=green]\"$3 }' ORS=' ')"
 set -g status-right ''
 
-set-hook -g window-pane-changed 'run-shell "$HOME/.tmux/git_status.sh #{pane_current_path}"'
-set-hook -g session-window-changed 'run-shell "$HOME/.tmux/git_status.sh #{pane_current_path}"'
-set-hook -g client-session-changed 'run-shell "$HOME/.tmux/git_status.sh #{pane_current_path}"'
+set-hook -g window-pane-changed 'run-shell "{{ playbook_dir }}/git_status.sh #{pane_current_path}"'
+set-hook -g session-window-changed 'run-shell "{{ playbook_dir }}/git_status.sh #{pane_current_path}"'
+set-hook -g client-session-changed 'run-shell "{{ playbook_dir }}/git_status.sh #{pane_current_path}"'
 
 # pane status
 set -wg pane-border-status top                                                 # set the pane status on top
 set -wg pane-border-format " #{b:pane_current_path} "                          # {pane_current_path_basename}
 
 if-shell 'echo $PROMPT_COMMAND | grep -qv git_status' \
-  'PROMPT_COMMAND="$HOME/.tmux/git_status.sh; $PROMPT_COMMAND"'
+  'PROMPT_COMMAND="{{ playbook_dir }}/git_status.sh; $PROMPT_COMMAND"'

@@ -7,4 +7,7 @@
         name: configurable_dependency
       vars:
         dep_name: tmux
-        files: [ tmux.conf ]
+        files: []
+    - template:
+        src: '{{ playbook_dir }}/tmux.conf.j2'
+        dest: ~/.tmux.conf

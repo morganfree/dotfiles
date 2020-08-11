@@ -1,0 +1,14 @@
+---
+- name: vim
+  hosts: local
+  tasks:
+    - name: install and configure vim
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: vim
+        files: []
+    - file:
+        src: '{{ playbook_dir }}'
+        dest: ~/.vim
+        state: link

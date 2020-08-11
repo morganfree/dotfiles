@@ -13,4 +13,4 @@
         src: '{{ item }}'
         path: /usr/local/bin/{{ item | basename }}
         state: link
-      loop: '{{ lookup("fileglob", "git/commands/*", wantlist=True) }}'
+      loop: '{{ lookup("fileglob", "{{ playbook_dir }}/commands/*", wantlist=True) }}'
