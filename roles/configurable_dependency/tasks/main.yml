@@ -1,0 +1,12 @@
+---
+- name: install {{ dep_name }}
+  homebrew:
+    name: '{{ dep_name }}'
+    state: present
+
+- name: configure {{ dep_name }}
+  file:
+    src: '{{ playbook_dir }}/{{ item }}'
+    path: ~/.{{ item }}
+    state: link
+  loop: '{{ files }}'
