@@ -1,0 +1,14 @@
+---
+- name: terraform
+  hosts: local
+  tasks:
+    - name: install and configure terraform
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: warrensbox/tap/tfswitch
+        files: [ terraformrc ]
+    - name: create terraform plugins directory
+      file:
+        path: ~/.terraform.d
+        state: directory

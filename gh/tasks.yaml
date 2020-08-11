@@ -1,0 +1,17 @@
+---
+- name: gh
+  hosts: local
+  tasks:
+    - name: install and configure gh
+      include_role:
+        name: configurable_dependency
+      vars:
+        dep_name: gh
+        files: []
+    - name: install gh commands
+      shell: |
+        gh alias set --shell {{ item | basename | splitext | first }} '{{ item }}'
+      register: guwno
+      loop: '{{ lookup("fileglob", "{{ playbook_dir }}/commands/*", wantlist=True) }}'
+    - debug:
+        var: guwno

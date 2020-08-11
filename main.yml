@@ -1,0 +1,8 @@
+---
+- import_playbook: bash/tasks.yaml
+- import_playbook: gh/tasks.yaml
+- import_playbook: git/tasks.yaml
+- import_playbook: terraform/tasks.yaml
+- import_playbook: tig/tasks.yaml
+- import_playbook: tmux/tasks.yaml
+- import_playbook: vim/tasks.yaml
