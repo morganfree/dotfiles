@@ -8,6 +8,7 @@
       vars:
         dep_name: git
         files: [ gitconfig, gitignore ]
+        cmd: git --version
     - name: install git commands
       file:
         src: '{{ item }}'

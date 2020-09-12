@@ -8,6 +8,7 @@
       vars:
         dep_name: vim
         files: []
+        cmd: vim --version
     - file:
         src: '{{ playbook_dir }}'
         dest: ~/.vim

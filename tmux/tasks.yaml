@@ -8,6 +8,7 @@
       vars:
         dep_name: tmux
         files: []
+        cmd: tmux -V
     - template:
         src: '{{ playbook_dir }}/tmux.conf.j2'
         dest: ~/.tmux.conf

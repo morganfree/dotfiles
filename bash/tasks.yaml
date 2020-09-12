@@ -8,3 +8,4 @@
       vars:
         dep_name: bash
         files: [ bashrc, bash_profile, inputrc ]
+        cmd: bash --version

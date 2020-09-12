@@ -8,6 +8,7 @@
       vars:
         dep_name: warrensbox/tap/tfswitch
         files: [ terraformrc ]
+        cmd: terraform --version
     - name: create terraform plugins directory
       file:
         path: ~/.terraform.d

@@ -7,3 +7,4 @@
         name: configurable_dependency
       vars:
         dep_name: tig
+        cmd: tig --version

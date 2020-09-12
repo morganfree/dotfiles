@@ -1,21 +1,36 @@
 ---
 - hosts: local
+  vars:
+    output: ''
+    pkgs:
+      - name: ag
+        cmd: ag --version
+      - name: bat
+        cmd: bat --version
+      - name: dive
+        cmd: dive --version
+      - name: fd
+        cmd: fd --version
+      - name: fzf
+        cmd: fzf --version
+      - name: jsonlint
+      - name: jq
+        cmd: jq --version
+      - name: hadolint
+        cmd: hadolint --version
+      - name: moreutils
+      - name: oath-toolkit
+        cmd: oathtool --version
+      - name: pass
+      - name: shellcheck
+      - name: tree
+        cmd: tree --version
   tasks:
     - homebrew:
-        pkg:
-          - ag
-          - bat
-          - dive
-          - fd
-          - fzf
-          - jsonlint
-          - jq
-          - hadolint
-          - moreutils
-          - oath-toolkit
-          - pass
-          - shellcheck
-          - tree
+        pkg: "{{ pkgs | map(attribute='name') | list }}"
         state: present
-        register: pkgs
-
+    - shell: '{{ item }}'
+      loop: "{{ pkgs | selectattr('cmd', 'defined') | map(attribute='cmd') | list }}"
+      register: pkg_versions
+    - debug:
+        msg: "{{ pkg_versions.results | map(attribute='stdout_lines') | map('first') | join('\n') }}"

@@ -8,10 +8,8 @@
       vars:
         dep_name: gh
         files: []
+        cmd: gh --version
     - name: install gh commands
       shell: |
         gh alias set --shell {{ item | basename | splitext | first }} '{{ item }}'
-      register: guwno
       loop: '{{ lookup("fileglob", "{{ playbook_dir }}/commands/*", wantlist=True) }}'
-    - debug:
-        var: guwno

@@ -10,3 +10,11 @@
     path: ~/.{{ item }}
     state: link
   loop: '{{ files }}'
+
+- name: verify {{ dep_name }}
+  shell: '{{ cmd }}'
+  register: cmd_output
+
+- name: show {{ cmd }} output
+  debug:
+    msg: '{{ cmd_output.stdout }}'
