@@ -1,0 +1,21 @@
+---
+- hosts: local
+  tasks:
+    - homebrew:
+        pkg:
+          - ag
+          - bat
+          - dive
+          - fd
+          - fzf
+          - jsonlint
+          - jq
+          - hadolint
+          - moreutils
+          - oath-toolkit
+          - pass
+          - shellcheck
+          - tree
+        state: present
+        register: pkgs
+
