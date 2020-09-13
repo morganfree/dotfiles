@@ -4,10 +4,6 @@
 [submodule "vim/pack/plugins/start/jellybeans"]
 	path = vim/pack/plugins/start/jellybeans
 	url = https://github.com/nanotech/jellybeans.vim
-[submodule "vim/pack/plugins/start/tern_for_vim"]
-	path = vim/pack/plugins/start/tern_for_vim
-	url = https://github.com/ternjs/tern_for_vim
-	ignore = dirty
 [submodule "vim/pack/plugins/start/undotree"]
 	path = vim/pack/plugins/start/undotree
 	url = https://github.com/mbbill/undotree
