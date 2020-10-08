@@ -9,6 +9,8 @@
         cmd: bat --version
       - name: dive
         cmd: dive --version
+      - name: exa
+        cmd: exa --version
       - name: fd
         cmd: fd --version
       - name: fzf
