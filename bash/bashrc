@@ -1,9 +1,12 @@
-shopt -s checkwinsize  # check the window size after each command and update the values of LINES and COLUMNS.
+#!/usr/bin/env bash
+
+shopt -s checkwinsize  # check the window size after each command and update the values of LINES and COLUMNS
 shopt -s cmdhist       # save multiline command in one line
+shopt -s histappend    # append to history instead of overwriting it
 shopt -s nocaseglob    # match files in a case-insensitive fashion
 
-# don't put duplicate lines or lines starting with space in the history.
-HISTCONTROL=ignoreboth
+# don't put duplicate lines or lines starting with space in the history:eliminate duplications before saving the line
+export HISTCONTROL=ignoreboth:erasedups
 
 export HISTIGNORE="&:[ ]*:?:??:exit:history:clear:pwd"
 export PS1='\$ '
@@ -14,10 +17,16 @@ export VISUAL=vim
 # aliases
 alias dotfiles='cd ~/dotfiles'
 
-alias tmuxconf='vim ~/.tmux.conf'
 alias vimrc='vim ~/.vim/vimrc'
-alias bashrc='vim ~/.bashrc'
-alias inputrc='vim ~/.inputrc'
+alias git-top='cd "$(git rev-parse --show-toplevel)"'
+alias gt='git-top'
+alias pkg-top='pkg_top'
+alias pt='pkg-top'
+
+alias tf='terraform'
+alias d='docker'
+alias g='git'
+alias b='bat'
 
 if [ -f ~/.bashrc.local ]; then
 	# shellcheck source=/dev/null
@@ -35,7 +44,13 @@ export_aws () {
 }
 
 set_aws_profile () {
-	export AWS_PROFILE=${1:-default}
+	local profile=${1:-default}
+
+	AWS_ACCESS_KEY_ID=$(pass aws/"$profile"/access_key)
+	AWS_SECRET_ACCESS_KEY=$(pass aws/"$profile"/secret_key)
+
+	export AWS_ACCESS_KEY_ID
+	export AWS_SECRET_ACCESS_KEY
 }
 
 export AWS_VAULT_BACKEND=pass
@@ -53,7 +68,7 @@ docker-lim() {
 	echo -n "$(docker image ls --format '{{.Repository}}:{{.Tag}}' | head -n 1)" | pbcopy
 }
 
-docker-ps-watch() {
+docker_ps_watch() {
 	local ids ids_count id
 	ids="$(docker container ps --format '{{.ID}}')"
 	ids_count="$(echo -n "$ids" | grep -c ^)"
@@ -66,7 +81,7 @@ docker-ps-watch() {
 	docker exec -it "$id" watch ps
 }
 
-docker-ps-sh() {
+docker_ps_sh() {
 	local ids ids_count id
 	ids="$(docker container ps --format '{{.ID}}')"
 	ids_count="$(echo -n "$ids" | grep -c ^)"
@@ -77,4 +92,81 @@ docker-ps-sh() {
 	[ "$ids_count" -gt 1 ] && id="$(echo "$ids" | fzf --print0)"
 
 	docker exec -it "$id" sh
+}
+
+ecr_login () {
+	local region=${1:-eu-west-2}
+	local account=${2:-955517586947}
+	local ecr_url="${account}.dkr.ecr.${region}.amazonaws.com"
+
+	set_aws_profile dev
+	#eval "$(aws ecr get-login --region "$region" --no-include-email)"
+	aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${ecr_url}"
+}
+
+ecr_login_prod () {
+	local region=${1:-eu-west-1}
+	local account=${2:-711372962861}
+	local ecr_url="${account}.dkr.ecr.${region}.amazonaws.com"
+
+	set_aws_profile prod
+	#eval "$(aws ecr get-login --region "$region" --no-include-email)"
+	aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${ecr_url}"
+}
+open_aws_prod () {
+	/Applications/Firefox.app/Contents/MacOS/firefox --private-window "$(aws-vault login --stdout prod)"
+}
+
+set_npm_token () {
+	NPM_TOKEN=$(head -n 1 < ~/.npmrc | cut -d= -f 2)
+
+	export NPM_TOKEN
+}
+. "$HOME/.cargo/env"
+
+pkg_top () {
+	[ -f package.json ] || [ "$(pwd)" = "/" ] && : || { cd .. && pkg_top; }
+}
+
+migrate_lb () {
+	terraform state mv module.service.aws_ecs_task_definition.cs_service module.service.module.task_definition.aws_ecs_task_definition.task_definition
+
+	terraform state mv module.service.aws_lb_listener_rule.cs_service_rule[0] module.service.module.load_balancer[0].aws_lb_listener_rule.listener_rule
+	terraform state mv module.service.aws_lb_target_group.cs_service_target[0] module.service.module.load_balancer[0].aws_lb_target_group.target_group
+}
+
+deploy_lb () {
+	terraform apply -target module.service.aws_ecs_service.cs_service_2
+}
+
+fcd () {
+	local \
+		gt \
+		orig_dir \
+		dir
+
+	gt="$(git rev-parse --show-toplevel)"
+	orig_dir="$(pwd)"
+
+	[ -n "$gt" ] && cd "$gt" || cd "$orig_dir" || return 1
+
+	dir="$(fd --color=always --hidden --exclude .git --type d --print0 . | fzf --read0 --ansi --no-multi --exit-0 --select-1 --preview='tree {}')"
+
+	[ -n "$dir" ] && cd "$dir" || cd "$orig_dir" || return 1
+}
+
+test_colors () {
+	awk 'BEGIN{
+	s="/\\/\\/\\/\\/\\"; s=s s s s s s s s s s s s s s s s s s s s s s s;
+	for (colnum = 0; colnum<256; colnum++) {
+		r = 255-(colnum*255/255);
+		g = (colnum*510/255);
+		b = (colnum*255/255);
+		if (g>255) g = 510-g;
+			printf "\033[48;2;%d;%d;%dm", r,g,b;
+			printf "\033[38;2;%d;%d;%dm", 255-r,255-g,255-b;
+			printf "%s\033[0m", substr(s,colnum+1,1);
+		}
+		printf "\n";
+	}'
 }

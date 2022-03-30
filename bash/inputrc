@@ -13,3 +13,6 @@ TAB: menu-complete
 RETURN: "\e\n"
 
 set keymap vi-command
+"gg": beginning-of-history
+"G": end-of-history
+
