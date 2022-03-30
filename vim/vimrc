@@ -7,6 +7,7 @@ set nocompatible                                    " make Vim behave in a more 
 
 set autoindent                                      " copy indent from current line when starting a new line
 set autoread                                        " read the file again if it has been changed outside of vim
+set backup
 set backspace=indent,eol,start                      " allow backspace to delete indent, end and start of line
 set backupdir=~/.vim/backup//                       " set the directory for backups
 set backupcopy=yes
@@ -21,7 +22,7 @@ set laststatus=2                                    " always show the statusline
 set lazyredraw                                      " prevent from unnecessary redraws
 set list listchars=tab:\|-,trail:_                  " make whitespace characters visible
 set matchpairs+=<:>                                 " '<' and '>' form a pair
-set nobackup
+"set nobackup
 set noerrorbells visualbell t_vb=                   " disable flash and bell on error
 set nofoldenable                                    " open all folds
 set nomodeline                                      " disable modeline
@@ -29,7 +30,7 @@ set noshowcmd                                       " do not show incomplete com
 set noshowmode                                      " do not show mode
 set nostartofline                                   " keep the cursor in the same line after navigating
 set nowrap                                          " do not wrap lines
-set nowritebackup
+"set nowritebackup
 set nojoinspaces                                    " do not insert two spaces after a '.', ', ', '?', '!' with a join command
 set number                                          " show the absolute number
 set path=$PWD/**                                    " set path to the current directory and its all subdirectories
@@ -69,7 +70,7 @@ hi User3 ctermfg=green ctermbg=236
 
 set statusline=%1*\ %n%2*\ %l/%L                    " set the left of status line to: {line number/number of lines} {column number}
 set statusline+=%=
-set statusline+=%3*%f                               " set the right of status line to: {relative path to file}
+set statusline+=%3*%F                               " set the right of status line to: {relative path to file}
 
 
 " -- KEY BINDINGS  ----------------------------------------------------------------------------------------------
@@ -153,6 +154,7 @@ let g:ale_lint_delay=1000                           " delay linting after text i
 let g:ale_completion_enabled=0                      " enable auto completion
 let g:ale_linters_explicit=1                        " do not run linters unless they are specified explicitly
 let g:ale_lint_on_enter=0
+let g:ale_hover_cursor=0
 
 nnoremap <leader>fi :ALEFix<cr>
 nnoremap <leader>h :ALEHover<cr>
@@ -205,7 +207,7 @@ function! s:fzf_dirs(dir, bang)
   endif
 
   return fzf#run(fzf#wrap({
-        \   'source': 'fd -t d',
+        \   'source': 'fd --type d --hidden',
         \   'dir': l:dir,
         \   'options': l:options
         \ }, a:bang))
@@ -213,12 +215,15 @@ endfunction
 
 command! -bang -nargs=? -complete=dir Dirs call <sid>fzf_dirs(<q-args>, <bang>0)
 
-nnoremap <space>f :Files<cr>
+nnoremap <space>f :GFiles<cr>
 nnoremap <space>d :Dirs<cr>
 nnoremap <space>b :Buffers<cr>
+nnoremap <space>a :Ag!<space>
 
 
 " -- autocommands  ----------------------------------------------------------------------------------------------
+
+" set autochdir
 
 augroup disable_auto_commenting
   autocmd!
@@ -227,9 +232,14 @@ augroup END
 
 augroup auto_change_dir
   autocmd!
-  autocmd InsertEnter * let b:save_cwd = getcwd() | set autochdir
-  autocmd InsertLeave * set noautochdir | execute 'cd' fnameescape(b:save_cwd)
+  autocmd BufEnter * silent! lcd %:p:h
 augroup END
+
+"augroup auto_change_dir
+"  autocmd!
+"  autocmd InsertEnter * let b:save_cwd = getcwd() | set autochdir
+"  autocmd InsertLeave * set noautochdir | execute 'cd' fnameescape(b:save_cwd)
+"augroup END
 
 augroup set_relativenumber_on_active_window
   autocmd!
