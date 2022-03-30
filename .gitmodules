@@ -16,3 +16,6 @@
 [submodule "vim/pack/plugins/start/vim-terraform"]
 	path = vim/pack/plugins/start/vim-terraform
 	url = https://github.com/hashivim/vim-terraform
+[submodule "vim/pack/plugins/start/vim-solidity"]
+	path = vim/pack/plugins/start/vim-solidity
+	url = https://github.com/tomlion/vim-solidity
