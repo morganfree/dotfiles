@@ -4,9 +4,6 @@
 [submodule "vim/pack/plugins/start/jellybeans"]
 	path = vim/pack/plugins/start/jellybeans
 	url = https://github.com/nanotech/jellybeans.vim
-[submodule "vim/pack/plugins/start/undotree"]
-	path = vim/pack/plugins/start/undotree
-	url = https://github.com/mbbill/undotree
 [submodule "vim/pack/plugins/start/fzf.vim"]
 	path = vim/pack/plugins/start/fzf.vim
 	url = https://github.com/junegunn/fzf.vim

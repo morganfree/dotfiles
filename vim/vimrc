@@ -187,16 +187,6 @@ nnoremap <leader>gg :ALEGoToDefinition -vsplit<cr>
 nnoremap <leader>go :ALEGoToDefinition<cr>
 
 
-" -- undotree  --------------------------------------------------------------------------------------------------
-
-let g:undotree_HelpLine=0                           " hide help line
-let g:undotree_WindowLayout=2                       " set the layout: the tree on the left, the diff below
-let g:undotree_SetFocusWhenToggle=1                 " focus undotree window after being opened
-
-" toggle undotree
-nnoremap <leader>u :UndotreeToggle<CR>
-
-
 " -- fzf  -------------------------------------------------------------------------------------------------------
 
 function! s:build_quickfix_list(lines)
