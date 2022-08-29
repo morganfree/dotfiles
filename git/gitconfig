@@ -3,6 +3,7 @@
 	excludesfile = ~/.gitignore
 	# pager = diff-so-fancy | less --tabs=4 -RFX
 	pager = delta
+	sshCommand = "ssh -i ~/.ssh/github/morganfree/id_ed25519"
 
 [interactive]
 	diffFilter = delta --color-only --features=interactive
@@ -23,12 +24,13 @@
 	hunk-header-style = file line-number syntax
 
 [user]
-	email = sebastiandomas@gmail.com
+	email = 14877823+morganfree@users.noreply.github.com
 	name = morganfree
-	#email = s.domas@cksource.com
-	#name = sdomas-cksource
 	signingkey = 63A81B569794670F
-	#signingkey = B2BC3B109207623D
+
+[include]
+	path = ~/.local.gitconfig
+
 
 [push]
 	default = upstream

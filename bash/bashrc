@@ -9,10 +9,10 @@ shopt -s nocaseglob    # match files in a case-insensitive fashion
 export HISTCONTROL=ignoreboth:erasedups
 
 export HISTIGNORE="&:[ ]*:?:??:exit:history:clear:pwd"
-export PS1='\$ '
+# export PS1='\$ '
+export PS1="\\033[90m\$ \\033[0m"
 export EDITOR='vim -e'
 export VISUAL=vim
-
 
 # aliases
 alias dotfiles='cd ~/dotfiles'
@@ -28,10 +28,8 @@ alias d='docker'
 alias g='git'
 alias b='bat'
 
-if [ -f ~/.bashrc.local ]; then
-	# shellcheck source=/dev/null
-	. ~/.bashrc.local
-fi
+alias aws-dev='aws_exec'
+alias aws-prod='aws_exec prod'
 
 export_aws () {
 	profile=${1:-default}
@@ -44,7 +42,7 @@ export_aws () {
 }
 
 set_aws_profile () {
-	local profile=${1:-default}
+	local profile=${1:-dev}
 
 	AWS_ACCESS_KEY_ID=$(pass aws/"$profile"/access_key)
 	AWS_SECRET_ACCESS_KEY=$(pass aws/"$profile"/secret_key)
@@ -64,7 +62,18 @@ get_mfa_prod() {
 	oathtool --base32 --totp "$(pass aws/prod/mfa)" | pbcopy
 }
 
-docker-lim() {
+aws_exec () {
+	local profile=dev
+
+	if [ "$1" = dev ] || [ "$1" = prod ]; then
+		profile=$1
+		shift
+	fi
+
+	aws-vault exec --mfa-token="$(oathtool --base32 --totp "$(pass aws/"${profile}"/mfa)")" "${profile}" -- "$@"
+}
+
+docker_lim() {
 	echo -n "$(docker image ls --format '{{.Repository}}:{{.Tag}}' | head -n 1)" | pbcopy
 }
 
@@ -83,13 +92,15 @@ docker_ps_watch() {
 
 docker_ps_sh() {
 	local ids ids_count id
-	ids="$(docker container ps --format '{{.ID}}')"
+	containers="$(docker container ps --format 'table {{.ID}}\t{{.Image}}\t{{.Names}}' | tail -n +2)"
+	ids="$(echo "$containers" | awk '{ print $1 }')"
+
 	ids_count="$(echo -n "$ids" | grep -c ^)"
 	id="$ids"
 
 	[ "$ids_count" -eq 0 ] && return
 
-	[ "$ids_count" -gt 1 ] && id="$(echo "$ids" | fzf --print0)"
+	[ "$ids_count" -gt 1 ] && id="$(echo "$containers" | fzf --print0 | awk '{ print $1 }')"
 
 	docker exec -it "$id" sh
 }
@@ -114,7 +125,12 @@ ecr_login_prod () {
 	aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${ecr_url}"
 }
 open_aws_prod () {
-	/Applications/Firefox.app/Contents/MacOS/firefox --private-window "$(aws-vault login --stdout prod)"
+	# /Applications/Firefox.app/Contents/MacOS/firefox --private-window "$(aws-vault login --stdout prod)"
+	/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome --incognito "$(aws-vault login --stdout prod)"
+}
+
+open_aws () {
+	/Applications/Google\ Chrome.app/Contents/MacOS/Google\ Chrome "$(aws-vault login --stdout dev)"
 }
 
 set_npm_token () {
@@ -126,17 +142,6 @@ set_npm_token () {
 
 pkg_top () {
 	[ -f package.json ] || [ "$(pwd)" = "/" ] && : || { cd .. && pkg_top; }
-}
-
-migrate_lb () {
-	terraform state mv module.service.aws_ecs_task_definition.cs_service module.service.module.task_definition.aws_ecs_task_definition.task_definition
-
-	terraform state mv module.service.aws_lb_listener_rule.cs_service_rule[0] module.service.module.load_balancer[0].aws_lb_listener_rule.listener_rule
-	terraform state mv module.service.aws_lb_target_group.cs_service_target[0] module.service.module.load_balancer[0].aws_lb_target_group.target_group
-}
-
-deploy_lb () {
-	terraform apply -target module.service.aws_ecs_service.cs_service_2
 }
 
 fcd () {
@@ -170,3 +175,21 @@ test_colors () {
 		printf "\n";
 	}'
 }
+
+alias graph-easy='/usr/local/Cellar/perl/5.34.0/bin/graph-easy'
+
+passf () {
+	local dir
+
+	dir="$HOME/.password-store/"
+
+	fd -e 'gpg' . "$dir" \
+		| sed -e "s:$dir::g" -e 's:.gpg$::g' \
+		| fzf +m --select-1 \
+		| xargs -n 1 pass -c
+}
+
+if [ -f ~/.bashrc.local ]; then
+	# shellcheck source=/dev/null
+	. ~/.bashrc.local
+fi

@@ -2,7 +2,6 @@
 
 set nocompatible                                    " make Vim behave in a more useful way
 
-
 " -- GENERAL  ---------------------------------------------------------------------------------------------------
 
 set autoindent                                      " copy indent from current line when starting a new line
@@ -11,7 +10,7 @@ set backup
 set backspace=indent,eol,start                      " allow backspace to delete indent, end and start of line
 set backupdir=~/.vim/backup//                       " set the directory for backups
 set backupcopy=yes
-set colorcolumn=80,120,140                          " set the screen column
+"set colorcolumn=80,120,140                          " set the screen column
 set completeopt=longest,menuone                     " improve completion menu
 set directory=~/.vim/swp//                          " set the directory for swaps
 set encoding=utf-8 nobomb                           " set encoding
@@ -37,7 +36,7 @@ set path=$PWD/**                                    " set path to the current di
 set relativenumber                                  " show the relative number
 set omnifunc=syntaxcomplete#Complete                " turn on omni completion according to syntax
 set scrolloff=3                                     " start scrolling # lines before a buffer horizontal borders
-set signcolumn=yes                                  " always draw the sign column
+set signcolumn=no                                  " always draw the sign column
 set smartcase                                       " disable ignorecase if uppercase letters are used
 set splitright                                      " a new window is put on the right
 set splitbelow                                      " a new window is put below
@@ -54,24 +53,49 @@ set winminwidth=0                                   " set the minimal width of a
 set t_Co=256                                        " enable 256 colors
 
 syntax on                                           " turn on syntax highlighting
+
+let g:jellybeans_overrides = {
+\    'background': { 'ctermbg': 'none', '256ctermbg': 'none' },
+\    'StatusLine': { 'ctermbg': 'none', '256ctermbg': 'none' },
+\}
+if has('termguicolors') && &termguicolors
+    let g:jellybeans_overrides['background']['guibg'] = 'none'
+    let g:jellybeans_overrides['StatusLine']['guibg'] = 'none'
+endif
+
+let g:jellybeans_use_lowcolor_black = 1
+
 colorscheme jellybeans                              " set colorscheme
 
 " no special color for listchars
 hi SpecialKey ctermbg=none
+hi VertSplit ctermfg=black ctermbg=none
+hi SignColumn ctermfg=none ctermbg=none
+hi EndOfBuffer ctermfg=black ctermbg=none
 
 
 " -- STATUS LINE  -----------------------------------------------------------------------------------------------
 
-hi StatusLineNC ctermbg=black
-hi StatusLine ctermbg=236
-hi User1 ctermfg=cyan ctermbg=236
-hi User2 ctermfg=yellow ctermbg=236
-hi User3 ctermfg=green ctermbg=236
+hi StatusLineNC ctermfg=244 ctermbg=none
+" hi StatusLine ctermbg=236
+hi StatusLine ctermbg=none ctermfg=244
+"hi StatusLine ctermbg=244 ctermfg=none
+hi User1 ctermfg=cyan ctermbg=none
+hi User2 ctermfg=yellow ctermbg=none
+hi User3 ctermfg=green ctermbg=none
+hi User4 ctermfg=244 ctermbg=none
 
-set statusline=%1*\ %n%2*\ %l/%L                    " set the left of status line to: {line number/number of lines} {column number}
-set statusline+=%=
-set statusline+=%3*%F                               " set the right of status line to: {relative path to file}
+" set statusline=%1*\ %n%2*\ %l/%L                    " set the left of status line to: {line number/number of lines} {column number}
+" set statusline+=%=
+" set statusline+=%3*%F                               " set the right of status line to: {relative path to file}
 
+"augroup statusline
+"    autocmd!
+"    autocmd WinEnter,BufEnter * setlocal statusline=%3*%F%1*\ %n%2*\ %l/%L
+"    autocmd WinLeave,BufLeave * setlocal statusline=%F\ %n\ %l/%L
+"augroup end
+
+set statusline=\ \ \ %F\ %n\ %l/%L
 
 " -- KEY BINDINGS  ----------------------------------------------------------------------------------------------
 
@@ -276,3 +300,22 @@ let &t_EI = "\e[2 q"                                " set the cursor to be a ste
 if filereadable(glob("~/.vimrc.local"))
   source ~/.vimrc.local
 endif
+
+function! TmuxSendKeys(cmd)
+	call system("tmux send-keys -t 1 " .. shellescape("'" .. a:cmd .. "'" , 0))
+	" call echo system('tmux send-keys -t 1 ' . shellescape(substitute(a:cmd, "'", "'\\\\''", 'g')))
+	" call system("tmux send-keys -t 1 '" . substitute(a:cmd, "'", "'\\\\''", 'g') . "'")
+	" call system("tmux set-buffer '" . substitute(a:cmd, "'", "'\\\\''", 'g') . "'")
+	" call system("tmux paste-buffer -t 1")
+endfunction
+
+command -nargs=1 Tmux call TmuxSendKeys(<args>)
+command -nargs=0 TmuxA call TmuxSendKeys(join(getline(1, '$'), "\n"))
+
+" nnoremap ee :Tmux<space>
+" nnoremap ff :TmuxA<CR>
+
+set laststatus=0
+set statusline=
+set ruler
+set rulerformat=%55(%=%4*\ %F\ %n\ %l/%L%)
