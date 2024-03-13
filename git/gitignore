@@ -1,11 +1,20 @@
 .vimrc.local
 *~
 *.sw[op]
-tags
 
 .DS_Store
-.env
-*.tfvars
+.env*
 
 ssh_key
 id_rsa
+*.pub
+*.key
+
+.terraform
+*.tfvars
+
+__misc
+
+node_modules
+dist
+tags

@@ -10,9 +10,63 @@ export HISTCONTROL=ignoreboth:erasedups
 
 export HISTIGNORE="&:[ ]*:?:??:exit:history:clear:pwd"
 # export PS1='\$ '
-export PS1="\\033[90m\$ \\033[0m"
+# export PS1="\\033[90m\$ \\033[0m
+
+__ps1() {
+  #local P='$' dir="${PWD##*/}" B countme short long double\
+  #  r='\[\e[31m\]' g='\[\e[30m\]' h='\[\e[34m\]' \
+  #  u='\[\e[33m\]' p='\[\e[34m\]' w='\[\e[35m\]' \
+  #  b='\[\e[36m\]' x='\[\e[0m\]'
+
+  #[[ $EUID == 0 ]] && P='#' && u=$r && p=$u # root
+  #[[ $PWD = / ]] && dir=/
+  #[[ $PWD = "$HOME" ]] && dir='~'
+
+  #B=$(git branch --show-current 2>/dev/null)
+  #[[ $dir = "$B" ]] && B=.
+  #countme="$USER$PROMPT_AT$(hostname):$dir($B)\$ "
+
+  #[[ $B == master || $B == main ]] && b="$r"
+  #[[ -n "$B" ]] && B="$g($b$B$g)"
+
+  #short="$u\u$g$PROMPT_AT$h\h$g:$w$dir$B$p$P$x "
+  #long="$g╔ $u\u$g$PROMPT_AT$h\h$g:$w$dir$B\n$g╚ $p$P$x "
+  #double="${r}╔ ${u}\u${r}$PROMPT_AT${h}\h${r}:${w}${dir}\n${r}║ $B\n${r}╚ ${p}${P}${x} "
+
+#  if (( ${#countme} > PROMPT_MAX )); then
+#    PS1="$double"
+#  elif (( ${#countme} > PROMPT_LONG )); then
+#    PS1="$long"
+#  else
+#    PS1="$short"
+
+#r fi
+	#grey='\[\e[90m\]'
+	#grey='\[\e[0;37m\]'
+	local \
+		grey='\[\e[38;2;58;58;58m\]' \
+		reset='\[\e[0m\]'
+
+	#PS1="  ${grey}║ \w $(git branch --show-current 2>/dev/null)\n  ${grey}╚ \$ ${reset}"
+	#PS1="  ${grey}╠ \w $(git branch --show-current 2>/dev/null)\n  ${grey}╚ \$ ${reset}"
+	#PS1="  ${grey}╠ \w $(git branch --show-current 2>/dev/null)\n  ${grey}╠ \$ ${reset}"
+	#PS1="  ${grey}╠ \$${reset} "
+	PS1="  ${grey}╠ ${AWS_VAULT:+"(aws:$AWS_VAULT) "}\$${reset} "
+	#PS1="${grey}| \w $(git branch --show-current 2>/dev/null)\n${grey}| \$ ${reset}"
+	#PS1="$long"
+
+	[ -n "$TMUX" ] && tmux refresh-client -S -t "$(tmux display -p '#{client_tty}')"
+}
+
+PROMPT_COMMAND="__ps1"
+
+# export PS1='\[\e[90m\]\w\n\$ \[\e[0m\]'
+# export PS1='\[033[90m\w\n\$ \\033[0m\]'
+
 export EDITOR='vim -e'
 export VISUAL=vim
+
+export FZF_DEFAULT_COMMAND='fd --hidden --exclude .git'
 
 # aliases
 alias dotfiles='cd ~/dotfiles'
@@ -20,16 +74,20 @@ alias dotfiles='cd ~/dotfiles'
 alias vimrc='vim ~/.vim/vimrc'
 alias git-top='cd "$(git rev-parse --show-toplevel)"'
 alias gt='git-top'
-alias pkg-top='pkg_top'
-alias pt='pkg-top'
+alias pt='pkg_top'
 
 alias tf='terraform'
 alias d='docker'
 alias g='git'
 alias b='bat'
 
-alias aws-dev='aws_exec'
-alias aws-prod='aws_exec prod'
+#alias aws-dev='aws_exec'
+#alias aws-prod='aws_exec prod'
+
+alias aws-dev='aws-vault exec dev -- bash'
+alias aws-prod='aws-vault exec prod -- bash'
+alias aws-root='aws-vault exec root -- bash'
+
 
 export_aws () {
 	profile=${1:-default}
@@ -50,6 +108,8 @@ set_aws_profile () {
 	export AWS_ACCESS_KEY_ID
 	export AWS_SECRET_ACCESS_KEY
 }
+
+export -f set_aws_profile
 
 export AWS_VAULT_BACKEND=pass
 export AWS_VAULT_PASS_PREFIX=aws-vault
@@ -110,8 +170,7 @@ ecr_login () {
 	local account=${2:-955517586947}
 	local ecr_url="${account}.dkr.ecr.${region}.amazonaws.com"
 
-	set_aws_profile dev
-	#eval "$(aws ecr get-login --region "$region" --no-include-email)"
+	#set_aws_profile dev
 	aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${ecr_url}"
 }
 
@@ -120,8 +179,7 @@ ecr_login_prod () {
 	local account=${2:-711372962861}
 	local ecr_url="${account}.dkr.ecr.${region}.amazonaws.com"
 
-	set_aws_profile prod
-	#eval "$(aws ecr get-login --region "$region" --no-include-email)"
+	#set_aws_profile prod
 	aws ecr get-login-password --region "${region}" | docker login --username AWS --password-stdin "${ecr_url}"
 }
 open_aws_prod () {
@@ -141,23 +199,35 @@ set_npm_token () {
 . "$HOME/.cargo/env"
 
 pkg_top () {
-	[ -f package.json ] || [ "$(pwd)" = "/" ] && : || { cd .. && pkg_top; }
+	[ -f package.json ] || [ "$PWD" = "/" ] && : || { cd .. && pkg_top; }
 }
 
 fcd () {
 	local \
-		gt \
-		orig_dir \
+		orig_dir="$PWD" \
+		git_dir \
 		dir
 
-	gt="$(git rev-parse --show-toplevel)"
-	orig_dir="$(pwd)"
+	git_dir="$(git rev-parse --show-toplevel)"
 
-	[ -n "$gt" ] && cd "$gt" || cd "$orig_dir" || return 1
+	[ -n "$git_dir" ] && cd "$git_dir" || cd "$orig_dir" || return 1
 
-	dir="$(fd --color=always --hidden --exclude .git --type d --print0 . | fzf --read0 --ansi --no-multi --exit-0 --select-1 --preview='tree {}')"
+	dir="$(fd --hidden --exclude .git --type d --print0 . | fzf --read0 --no-multi --exit-0 --select-1 --preview='tree {}')"
 
 	[ -n "$dir" ] && cd "$dir" || cd "$orig_dir" || return 1
+}
+
+gcd () {
+	local \
+		orig_dir="$PWD" \
+		git_dir="$HOME/workspace" \
+		dir
+
+	cd "$git_dir" || cd "$orig_dir" || return 1
+
+	dir=$(fd --type d --hidden --print0 '.git$' . | fzf --read0 --no-multi --exit-0 --select-1 --delimiter '/' --with-nth='..-3' --height=50% --layout=reverse)
+
+	[ -n "$dir" ] && cd "$(dirname "$dir")" || cd "$orig_dir" || return 1
 }
 
 test_colors () {
@@ -187,6 +257,16 @@ passf () {
 		| sed -e "s:$dir::g" -e 's:.gpg$::g' \
 		| fzf +m --select-1 \
 		| xargs -n 1 pass -c
+}
+
+get_internal_ips () {
+	region=eu-west-2
+	cluster=cs-internal
+
+	container_instance_arns=$(aws --region "$region" ecs list-container-instances --cluster "$cluster" --query "containerInstanceArns" --output text)
+	ec2_instance_ids=$(aws --region "$region" ecs describe-container-instances --cluster "$cluster" --container-instances $container_instance_arns --query "containerInstances[].ec2InstanceId" --output text)
+
+	aws --region "$region" ec2 describe-instances --instance-ids $ec2_instance_ids --query "Reservations[].Instances[].[PrivateDnsName]" --output text
 }
 
 if [ -f ~/.bashrc.local ]; then

@@ -308,4 +308,11 @@ command -nargs=0 TmuxA call TmuxSendKeys(join(getline(1, '$'), "\n"))
 set laststatus=0
 set statusline=
 set ruler
-set rulerformat=%55(%=%4*\ %F\ %n\ %l/%L%)
+set rulerformat=%55(%=%4*\ %F\ [%{&filetype}]\ %n\ %l/%L%)
+set shm+=I
+
+
+"augroup no_filetype
+"  autocmd!
+"  autocmd filetypedetect BufNewFile,BufRead * if &filetype ==# '' | setlocal spell spelllang=en_us | endif
+"augroup END

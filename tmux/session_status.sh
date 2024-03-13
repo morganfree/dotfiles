@@ -13,4 +13,4 @@ for session in $sessions; do
   fi
 done
 
-echo "$status#[fg=white,bold]| "
+printf '%s#[fg=white,bold]| ' "$status"
