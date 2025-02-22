@@ -51,7 +51,7 @@ __ps1() {
 	#PS1="  ${grey}╠ \w $(git branch --show-current 2>/dev/null)\n  ${grey}╚ \$ ${reset}"
 	#PS1="  ${grey}╠ \w $(git branch --show-current 2>/dev/null)\n  ${grey}╠ \$ ${reset}"
 	#PS1="  ${grey}╠ \$${reset} "
-	PS1="  ${grey}╠ ${AWS_VAULT:+"(aws:$AWS_VAULT) "}\$${reset} "
+	PS1="  ${grey}╠ ${AWS_VAULT:+"(aws:$AWS_VAULT) "}\t \$${reset} "
 	#PS1="${grey}| \w $(git branch --show-current 2>/dev/null)\n${grey}| \$ ${reset}"
 	#PS1="$long"
 
@@ -87,7 +87,27 @@ alias b='bat'
 alias aws-dev='aws-vault exec dev -- bash'
 alias aws-prod='aws-vault exec prod -- bash'
 alias aws-root='aws-vault exec root -- bash'
+alias aws-security='aws-vault exec security -- bash'
+alias aws-sandbox='aws-vault exec sandbox -- bash'
 
+alias login-dev='aws-vault login --stdout dev | pbcopy'
+alias login-prod='aws-vault login --stdout prod | pbcopy'
+alias login-root='aws-vault login --stdout root | pbcopy'
+alias login-security='aws-vault login --stdout security | pbcopy'
+
+caws () {
+	profiles=${1:-dev}
+
+	IFS="," read -ra profiles <<< "${1:-dev}"
+
+	for profile in "${profiles[@]}"; do
+		eval "$(aws-vault export --format=export-env "$profile")"
+
+		aws configure set --profile "$profile" aws_access_key_id "$AWS_ACCESS_KEY_ID"
+		aws configure set --profile "$profile" aws_secret_access_key "$AWS_SECRET_ACCESS_KEY"
+		aws configure set --profile "$profile" aws_session_token "$AWS_SESSION_TOKEN"
+	done
+}
 
 export_aws () {
 	profile=${1:-default}

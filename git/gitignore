@@ -18,3 +18,5 @@ __misc
 node_modules
 dist
 tags
+
+__notes*
